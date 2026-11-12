@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("⚾ Baseball Analytics Platform")
+st.title("⚾ MLB Pitching Analytics")
 st.caption("Exploring MLB pitching performance with Statcast data")
 
 st.info("Milestone 1: Application skeleton. Real data coming soon!")
