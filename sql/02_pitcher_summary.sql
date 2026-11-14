@@ -64,6 +64,7 @@ SELECT
     p.avg_spin,
     p.swings,
     p.whiffs,
+    p.csw_events,
 
     ROUND(
         100.0 * p.whiffs

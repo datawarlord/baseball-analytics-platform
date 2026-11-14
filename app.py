@@ -1,8 +1,12 @@
 
-from pathlib import Path
-
-import pandas as pd
 import streamlit as st
+
+from src.dashboard_data import (
+    load_pitcher_overall,
+    load_pitcher_summary,
+    get_pitcher_options,
+    add_pitch_names,
+)
 
 st.set_page_config(
     page_title="MLB Pitching Analytics",
@@ -10,55 +14,17 @@ st.set_page_config(
     layout="wide",
 )
 
-DATA_FILE = (
-    Path(__file__).resolve().parent
-    / "data/curated/pitcher_summary.parquet"
-)
-
-PITCH_NAMES = {
-    "FF": "Four-Seam Fastball",
-    "SI": "Sinker",
-    "SL": "Slider",
-    "CH": "Changeup",
-    "FC": "Cutter",
-    "ST": "Sweeper",
-    "CU": "Curveball",
-    "FS": "Splitter",
-    "KC": "Knuckle Curve",
-    "SV": "Slurve",
-    "EP": "Eephus",
-    "FA": "Fastball",
-    "CS": "Slow Curve",
-    "KN": "Knuckleball",
-    "FO": "Forkball",
-}
-
-
-@st.cache_data
-def load_data():
-    return pd.read_parquet(DATA_FILE)
-
-
 st.title("⚾ MLB Pitching Analytics")
-st.caption("June 2025 | MLB Statcast | Pitch-level analytics")
+st.caption("June 2025 | MLB Statcast | Pitcher Explorer")
 
-if not DATA_FILE.exists():
-    st.error("Curated dataset not found. Run the data pipeline.")
+try:
+    overall = load_pitcher_overall()
+    summary = load_pitcher_summary()
+except FileNotFoundError:
+    st.error("Curated datasets not found. Run the data pipeline.")
     st.stop()
 
-df = load_data()
-
-# Create a pitcher lookup keyed by MLB player ID.
-pitchers = (
-    df[["pitcher_id", "player_name"]]
-    .drop_duplicates(subset=["pitcher_id"])
-    .sort_values("player_name")
-)
-
-pitcher_options = {
-    int(row.pitcher_id): row.player_name
-    for row in pitchers.itertuples(index=False)
-}
+pitcher_options = get_pitcher_options(overall)
 
 st.sidebar.header("Pitcher Selection")
 
@@ -75,49 +41,25 @@ min_pitches = st.sidebar.slider(
     value=20,
 )
 
-pitcher_df = df[df["pitcher_id"] == selected_id].copy()
+pitcher = overall[
+    overall["pitcher_id"] == selected_id
+].iloc[0]
 
-pitcher_name = pitcher_options[selected_id]
-
-pitcher_df["pitch_name"] = (
-    pitcher_df["pitch_type"]
-    .map(PITCH_NAMES)
-    .fillna(pitcher_df["pitch_type"])
+pitch_types = add_pitch_names(
+    summary[summary["pitcher_id"] == selected_id]
 )
 
-total_pitches = int(pitcher_df["pitches"].sum())
-total_swings = int(pitcher_df["swings"].sum())
-total_whiffs = int(pitcher_df["whiffs"].sum())
+st.header(pitcher["player_name"])
 
-whiff_pct = (
-    100 * total_whiffs / total_swings
-    if total_swings > 0 else None
-)
+col1, col2, col3, col4 = st.columns(4)
 
-# Overall CSW is weighted by pitch count.
-# The summary stores rounded percentages.
-csw_pct = (
-    (pitcher_df["csw_pct"] * pitcher_df["pitches"]).sum()
-    / total_pitches
-    if total_pitches > 0 else None
-)
+col1.metric("Total Pitches", f"{pitcher['total_pitches']:,}")
+col2.metric("Games", f"{pitcher['games']:,}")
+col3.metric("Whiff Rate", f"{pitcher['whiff_pct']:.1f}%")
+col4.metric("CSW%", f"{pitcher['csw_pct']:.1f}%")
 
-st.header(pitcher_name)
-
-col1, col2, col3 = st.columns(3)
-
-col1.metric("Total Pitches", f"{total_pitches:,}")
-col2.metric(
-    "Whiff Rate",
-    f"{whiff_pct:.1f}%" if whiff_pct is not None else "N/A",
-)
-col3.metric(
-    "CSW%",
-    f"{csw_pct:.1f}%" if csw_pct is not None else "N/A",
-)
-
-filtered = pitcher_df[
-    pitcher_df["pitches"] >= min_pitches
+filtered = pitch_types[
+    pitch_types["pitches"] >= min_pitches
 ].copy()
 
 if filtered.empty:
@@ -132,7 +74,7 @@ mix = filtered.sort_values(
 
 st.bar_chart(mix["usage_pct"], y_label="Usage (%)")
 
-st.subheader("Average Velocity by Pitch Type")
+st.subheader("Average Velocity")
 
 velocity = filtered.sort_values(
     "avg_velocity", ascending=False
@@ -177,11 +119,8 @@ st.dataframe(
     width="stretch",
 )
 
-st.divider()
-
 st.caption(
     "Source: MLB Statcast via Baseball Savant. "
-    "League benchmarks reflect June 2025 only. "
-    "Whiff% = misses / swings; "
+    "June 2025 only. Whiff% = misses / swings; "
     "CSW% = called strikes + misses / eligible pitches."
 )
