@@ -31,9 +31,16 @@ WITH source AS (
         launch_speed,
         launch_angle,
 
-        estimated_woba_using_speedangle
+        estimated_woba_using_speedangle,
 
-    FROM read_parquet('{{RAW_FILE}}')
+        year AS reporting_year,
+        month AS reporting_month
+
+    FROM read_parquet(
+        '{{RAW_GLOB}}',
+        hive_partitioning = true,
+        union_by_name = true
+    )
 ),
 
 classified AS (
