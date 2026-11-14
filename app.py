@@ -124,3 +124,16 @@ st.caption(
     "June 2025 only. Whiff% = misses / swings; "
     "CSW% = called strikes + misses / eligible pitches."
 )
+
+from pathlib import Path
+
+with st.sidebar.expander("Deployment Diagnostics"):
+    app_dir = Path(__file__).resolve().parent
+    pages_dir = app_dir / "pages"
+
+    st.write("App directory:", str(app_dir))
+    st.write("Pages directory exists:", pages_dir.exists())
+    st.write(
+        "Page files:",
+        [p.name for p in pages_dir.glob("*.py")]
+    )
