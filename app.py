@@ -65,6 +65,26 @@ filtered_summary = filter_period(
     selected_periods,
 )
 
+from src.monthly_dashboard_data import CURATED
+
+st.write("Curated directory:", str(CURATED.resolve()))
+st.write(
+    "Overall file:",
+    str((CURATED / "pitcher_overall_monthly.parquet").resolve())
+)
+
+import hashlib
+
+def file_sha256(path):
+    with open(path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+overall_path = CURATED / "pitcher_overall_monthly.parquet"
+summary_path = CURATED / "pitcher_summary_monthly.parquet"
+
+st.write("Deployed overall SHA256:", file_sha256(overall_path))
+st.write("Deployed summary SHA256:", file_sha256(summary_path))
+
 st.write("DEPLOYMENT DIAGNOSTICS")
 st.write("Overall columns:", monthly_overall.columns.tolist())
 st.write("Summary columns:", monthly_summary.columns.tolist())
