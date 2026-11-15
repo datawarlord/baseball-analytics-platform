@@ -8,11 +8,14 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / "data" / "curated"
 
+@st.cache_data
+def _read_parquet(path: str, modified_time: int):
+    return pd.read_parquet(path)
 
 # @st.cache_data
 def load_monthly_summary():
     path = CURATED / "pitcher_summary_monthly.parquet"
-    df = pd.read_parquet(path)
+    df = _read_parquet(str(path), path.stat().st_mtime_ns)
 
     df["reporting_year"] = df["reporting_year"].astype(int)
     df["reporting_month"] = df["reporting_month"].astype(int)
@@ -22,7 +25,7 @@ def load_monthly_summary():
 # @st.cache_data
 def load_monthly_overall():
     path = CURATED / "pitcher_overall_monthly.parquet"
-    df = pd.read_parquet(path)
+    df = _read_parquet(str(path), path.stat().st_mtime_ns)
 
     df["reporting_year"] = df["reporting_year"].astype(int)
     df["reporting_month"] = df["reporting_month"].astype(int)
