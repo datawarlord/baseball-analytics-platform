@@ -65,31 +65,6 @@ filtered_summary = filter_period(
     selected_periods,
 )
 
-from src.monthly_dashboard_data import CURATED
-
-st.write("Curated directory:", str(CURATED.resolve()))
-st.write(
-    "Overall file:",
-    str((CURATED / "pitcher_overall_monthly.parquet").resolve())
-)
-
-import hashlib
-
-def file_sha256(path):
-    with open(path, "rb") as f:
-        return hashlib.sha256(f.read()).hexdigest()
-
-from pathlib import Path
-import pandas as pd
-
-overall_path = Path("data/curated/pitcher_overall_monthly.parquet")
-
-direct_df = pd.read_parquet(overall_path)
-
-st.write("DIRECT PARQUET COLUMNS:", direct_df.columns.tolist())
-st.write("LOADED DATAFRAME COLUMNS:", monthly_overall.columns.tolist())
-
-st.stop()
 # Aggregate across selected periods.
 overall = aggregate_overall(filtered_overall)
 summary = aggregate_summary(filtered_summary)
