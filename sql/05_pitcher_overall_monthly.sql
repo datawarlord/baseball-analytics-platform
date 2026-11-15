@@ -46,11 +46,7 @@ SELECT
         100.0 * SUM(is_csw)
         / NULLIF(COUNT(*), 0),
         1
-    ) AS csw_pct,
-    SUM(release_speed) AS velocity_sum,
-    COUNT(release_speed) AS velocity_count,
-    SUM(release_spin_rate) AS spin_sum,
-    COUNT(release_spin_rate) AS spin_count
+    ) AS csw_pct
 
 FROM eligible
 
