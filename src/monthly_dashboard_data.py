@@ -1,7 +1,6 @@
 
 from pathlib import Path
 
-from duckdb import df
 import pandas as pd
 import streamlit as st
 
@@ -46,15 +45,6 @@ def available_periods(df):
         for row in periods.itertuples(index=False)
     ]
 
-
-def filter_period(df, selected_periods):
-    keys = pd.MultiIndex.from_frame(
-        df[["reporting_year", "reporting_month"]]
-    )
-
-    return df.loc[
-        keys.isin(selected_periods)
-    ].copy()
 def filter_period(df, selected_periods):
     """
     Filter monthly data using normalized year/month values.
