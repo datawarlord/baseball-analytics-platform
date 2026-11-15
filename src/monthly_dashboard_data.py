@@ -1,6 +1,7 @@
 
 from pathlib import Path
 
+from duckdb import df
 import pandas as pd
 import streamlit as st
 
@@ -75,18 +76,34 @@ def filter_period(df, selected_periods):
 
     return df.loc[mask].copy()
 
+
 def aggregate_overall(df):
     result = (
         df.groupby("pitcher_id", as_index=False)
         .agg(
             player_name=("player_name", "first"),
             total_pitches=("total_pitches", "sum"),
+            games=("games", "sum"),
             swings=("swings", "sum"),
             whiffs=("whiffs", "sum"),
             called_strikes=("called_strikes", "sum"),
             csw_events=("csw_events", "sum"),
+            velocity_sum=("velocity_sum", "sum"),
+            velocity_count=("velocity_count", "sum"),
+            spin_sum=("spin_sum", "sum"),
+            spin_count=("spin_count", "sum"),
         )
     )
+
+    result["avg_velocity"] = (
+        result["velocity_sum"]
+        / result["velocity_count"].replace(0, float("nan"))
+    ).round(1)
+
+    result["avg_spin"] = (
+        result["spin_sum"]
+        / result["spin_count"].replace(0, float("nan"))
+    ).round(0)
 
     result["swing_pct"] = (
         100 * result["swings"]
@@ -156,9 +173,23 @@ def aggregate_summary(df):
             swings=("swings", "sum"),
             whiffs=("whiffs", "sum"),
             csw_events=("csw_events", "sum"),
+            velocity_sum=("velocity_sum", "sum"),
+            velocity_count=("velocity_count", "sum"),
+            spin_sum=("spin_sum", "sum"),
+            spin_count=("spin_count", "sum"),
         )
     )
 
+    pitcher["avg_velocity"] = (
+        pitcher["velocity_sum"]
+        / pitcher["velocity_count"].replace(0, float("nan"))
+    ).round(1)
+
+    pitcher["avg_spin"] = (
+        pitcher["spin_sum"]
+        / pitcher["spin_count"].replace(0, float("nan"))
+    ).round(0)
+    
     # Calculate total pitches for each pitcher.
     pitcher["total_pitches"] = (
         pitcher.groupby("pitcher_id")["pitches"]

@@ -30,6 +30,11 @@ pitcher_pitch_type AS (
         ROUND(AVG(release_speed), 1) AS avg_velocity,
         ROUND(AVG(release_spin_rate), 0) AS avg_spin,
 
+        SUM(release_speed) AS velocity_sum,
+        COUNT(release_speed) AS velocity_count,
+        SUM(release_spin_rate) AS spin_sum,
+        COUNT(release_spin_rate) AS spin_count,
+
         SUM(is_swing) AS swings,
         SUM(is_whiff) AS whiffs,
         SUM(is_csw) AS csw_events
@@ -70,6 +75,10 @@ SELECT
 
     p.avg_velocity,
     p.avg_spin,
+    p.velocity_sum,
+    p.velocity_count,
+    p.spin_sum,
+    p.spin_count,
     p.swings,
     p.whiffs,
     p.csw_events,
@@ -100,7 +109,6 @@ SELECT
         / NULLIF(l.league_pitches, 0),
         1
     ) AS league_csw_pct
-
 FROM pitcher_pitch_type p
 
 JOIN pitcher_totals t

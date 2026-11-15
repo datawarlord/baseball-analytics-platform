@@ -25,6 +25,11 @@ SELECT
     ROUND(AVG(release_speed), 1) AS avg_velocity,
     ROUND(AVG(release_spin_rate), 0) AS avg_spin,
 
+    SUM(release_speed) AS velocity_sum,
+    COUNT(release_speed) AS velocity_count,
+    SUM(release_spin_rate) AS spin_sum,
+    COUNT(release_spin_rate) AS spin_count,
+
     ROUND(
         100.0 * SUM(is_swing)
         / NULLIF(COUNT(*), 0),
@@ -41,7 +46,11 @@ SELECT
         100.0 * SUM(is_csw)
         / NULLIF(COUNT(*), 0),
         1
-    ) AS csw_pct
+    ) AS csw_pct,
+    SUM(release_speed) AS velocity_sum,
+    COUNT(release_speed) AS velocity_count,
+    SUM(release_spin_rate) AS spin_sum,
+    COUNT(release_spin_rate) AS spin_count
 
 FROM eligible
 

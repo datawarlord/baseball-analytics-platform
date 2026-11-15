@@ -137,7 +137,7 @@ pitch_types = add_pitch_names(
 
 st.header(pitcher["player_name"])
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 
 col1.metric(
     "Total Pitches",
@@ -145,15 +145,19 @@ col1.metric(
 )
 
 col2.metric(
+    "Games",
+    f"{pitcher['games']:,}",
+)
+
+col3.metric(
     "Whiff Rate",
     f"{pitcher['whiff_pct']:.1f}%",
 )
 
-col3.metric(
+col4.metric(
     "CSW%",
     f"{pitcher['csw_pct']:.1f}%",
 )
-
 filtered = pitch_types[
     pitch_types["pitches"] >= min_pitches
 ].copy()
@@ -175,6 +179,17 @@ st.bar_chart(
     y_label="Usage (%)",
 )
 
+st.subheader("Average Velocity")
+
+velocity = filtered.sort_values(
+    "avg_velocity", ascending=False
+).set_index("pitch_name")
+
+st.bar_chart(
+    velocity["avg_velocity"],
+    y_label="Velocity (mph)",
+)
+
 st.subheader("Pitch Effectiveness")
 
 display_df = filtered[
@@ -182,6 +197,8 @@ display_df = filtered[
         "pitch_name",
         "pitches",
         "usage_pct",
+        "avg_velocity",
+        "avg_spin",
         "whiff_pct",
         "league_whiff_pct",
         "csw_pct",
@@ -193,6 +210,8 @@ display_df.columns = [
     "Pitch Type",
     "Pitches",
     "Usage %",
+    "Avg Velocity",
+    "Avg Spin",
     "Whiff %",
     "League Whiff %",
     "CSW %",
