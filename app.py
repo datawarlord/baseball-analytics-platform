@@ -79,19 +79,17 @@ def file_sha256(path):
     with open(path, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
 
-overall_path = CURATED / "pitcher_overall_monthly.parquet"
-summary_path = CURATED / "pitcher_summary_monthly.parquet"
+from pathlib import Path
+import pandas as pd
 
-st.write("Deployed overall SHA256:", file_sha256(overall_path))
-st.write("Deployed summary SHA256:", file_sha256(summary_path))
+overall_path = Path("data/curated/pitcher_overall_monthly.parquet")
 
-st.write("DEPLOYMENT DIAGNOSTICS")
-st.write("Overall columns:", monthly_overall.columns.tolist())
-st.write("Summary columns:", monthly_summary.columns.tolist())
-st.write("Overall rows:", len(monthly_overall))
-st.write("Filtered rows:", len(filtered_overall))
+direct_df = pd.read_parquet(overall_path)
 
-st.stop() 
+st.write("DIRECT PARQUET COLUMNS:", direct_df.columns.tolist())
+st.write("LOADED DATAFRAME COLUMNS:", monthly_overall.columns.tolist())
+
+st.stop()
 # Aggregate across selected periods.
 overall = aggregate_overall(filtered_overall)
 summary = aggregate_summary(filtered_summary)

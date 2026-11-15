@@ -9,23 +9,24 @@ ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / "data" / "curated"
 
 
-@st.cache_data
+# @st.cache_data
 def load_monthly_summary():
-    df = pd.read_parquet(
-        CURATED / "pitcher_summary_monthly.parquet"
-    )
+    path = CURATED / "pitcher_summary_monthly.parquet"
+    df = pd.read_parquet(path)
+
     df["reporting_year"] = df["reporting_year"].astype(int)
     df["reporting_month"] = df["reporting_month"].astype(int)
     return df
 
 
-@st.cache_data
+# @st.cache_data
 def load_monthly_overall():
-    df = pd.read_parquet(
-        CURATED / "pitcher_overall_monthly.parquet"
-    )
+    path = CURATED / "pitcher_overall_monthly.parquet"
+    df = pd.read_parquet(path)
+
     df["reporting_year"] = df["reporting_year"].astype(int)
     df["reporting_month"] = df["reporting_month"].astype(int)
+
     return df
 
 def available_periods(df):
