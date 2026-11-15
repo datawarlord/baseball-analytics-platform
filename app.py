@@ -65,6 +65,13 @@ filtered_summary = filter_period(
     selected_periods,
 )
 
+st.write("DEPLOYMENT DIAGNOSTICS")
+st.write("Overall columns:", monthly_overall.columns.tolist())
+st.write("Summary columns:", monthly_summary.columns.tolist())
+st.write("Overall rows:", len(monthly_overall))
+st.write("Filtered rows:", len(filtered_overall))
+
+st.stop() 
 # Aggregate across selected periods.
 overall = aggregate_overall(filtered_overall)
 summary = aggregate_summary(filtered_summary)
