@@ -85,7 +85,10 @@ SELECT
         / NULLIF(p.pitches, 0),
         1
     ) AS csw_pct,
-
+    l.league_pitches,
+    l.league_swings,
+    l.league_whiffs,
+    l.league_csw_events,
     ROUND(
         100.0 * l.league_whiffs
         / NULLIF(l.league_swings, 0),
