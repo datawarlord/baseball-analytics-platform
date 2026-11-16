@@ -1,15 +1,22 @@
 
+import os
 from pathlib import Path
 
 import duckdb
 
 ROOT = Path(__file__).resolve().parents[1]
 
-CURATED_ROOT = ROOT / "data/curated/pitch_details"
-OUTPUT_ROOT = ROOT / "data/curated"
+OUTPUT_ROOT = Path(
+    os.environ.get(
+        "BASEBALL_CURATED_DIR",
+        str(ROOT / "data" / "curated"),
+    )
+)
+
+CURATED_ROOT = OUTPUT_ROOT / "pitch_details"
 
 DATASETS = [
-    (
+    (  
         "sql/04_pitcher_summary_monthly.sql",
         "pitcher_summary_monthly.parquet",
     ),
@@ -21,6 +28,7 @@ DATASETS = [
 
 
 def main():
+    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     curated_files = list(
         CURATED_ROOT.glob("year=*/month=*/pitches.parquet")
     )
